@@ -3,7 +3,7 @@ Repository for UAM Scheduling Code
 
 ## Important Information:
 
-This program has been tested with python ver 2.7. Can check your python version by running following in terminal:
+This program has been tested with python ver 2.7. Can check your python version by running the following in the terminal:
 
 python --version 
 
@@ -17,7 +17,7 @@ matplotlib 3.3.3
 
 ## Download Instructions:
 
-Click the green "Code" button next to the "Add File" button underneath the upper repository tool bar.
+Click the green "Code" button next to the "Add File" button underneath the upper repository toolbar.
 
 Click the "Download as Zip" option.
 
@@ -127,12 +127,12 @@ value iteration and MCTS.
 This file contains the functions used by the MDP model class.
 
 #### generate_MDP(depth):
-This function generates a new MDP object. It does this by recursivly stepping through the task generator environment and recording 
+This function generates a new MDP object. It does this by recursively stepping through the task generator environment and recording 
 the job configurations it reaches and the associated transition probabilities and rewards. Once the specified depth has been reached,
 the function compresses the MDP into a single agent model.
 
 #### prune_state_actions():
-This function prunes the MDP of all terminal brances. It does this by recursivly stepping back from the Terminal state to all previous states.
+This function prunes the MDP of all terminal branches. It does this by recursively stepping back from the Terminal state to all previous states.
 At each previous state, the function removes all actions that lead to the terminal state. If all the actions from the previous state are removed
 in this step, then the state is removed from the state set and the process is repeated.
 
@@ -152,14 +152,14 @@ This file contains the functions used by the scheduler agent class when traversi
 
 #### soft_task_learning(epsilon, gamma, num_samples=0)
 The soft task learning function learns the probability distributions of the task generator MDP by sampling. The algorithm can either calculate
-the number of samples from the epsilon and gamma parameters, or can set the number of sampless directly with the num_samples parameter. This function 
+the number of samples from the epsilon and gamma parameters, or can set the number of samples directly with the num_samples parameter. This function 
 returns the estimated probability distributions for computation time and inter-arrival time for all the tasks in the system.
 
 #### hard_task_learning(epsilon, gamma, num_samples=0)
 The soft task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
 this function runs the prune_state_actions function on the MDP environment. It then performs the sampling step on the pruned MDP, so as to 
 not enter the terminal state. Just as in the soft task function, the function can calculate the number of samples from the epsilon and gamma 
-parameters, or can set the number of sampless directly with the num_samples parameter. This function returns the estimated probability 
+parameters, or can set the number of samples directly with the num_samples parameter. This function returns the estimated probability 
 distributions for computation time and inter-arrival time for all the tasks in the system.
 
 #### make_estimate_MDP(depth)
@@ -178,8 +178,8 @@ across each episode.
 
 #### test_MCTS_policy(depth=10, num_samples=10, num_ep=1, rand=True):
 This function is similar to test_optimal_policy, except the actions chosen at each state are provided by an MCTS algorithm. The depth parameter
-indicatets to what depth the MCTS simulation should extend. The num_samples parameter corresponds to the number of simulation samples the MCTS
-algorithm should take from each action. the num_ep parameter indicates the number of episodes the test function should run for. Finally the 
+indicates to what depth the MCTS simulation should extend. The num_samples parameter corresponds to the number of simulation samples the MCTS
+algorithm should take from each action. the num_ep parameter indicates the number of episodes the test function should run for. Finally, the 
 rand parameter indicates the simulation policy the MCTS algorithm should use. If rand = True, the simulation step will use a random policy. 
 If rand = False, the simulation step will use an earliest-deadline-first policy. Just like test_optimal_policy, this function returns a dictionary
 with the total reward across each episode.
@@ -190,14 +190,14 @@ with the total reward across each episode.
 This file contains the functions used by the non-preemptible MDP model class.
 
 #### generate_MDP(depth):
-This function generates a new MDP object. It does this by recursivly stepping through the task generator environment and recording 
+This function generates a new MDP object. It does this by recursivelysamples stepping through the task generator environment and recording 
 the job configurations it reaches and the associated transition probabilities and rewards. Unlike the function in task_gen_MDP, 
 this function generates the state space by completing each job it begins without interruption. The function does this by working on 
 the same job at each time step until it completes or enters the terminal state. After the potential next states have been reached,
 the function cuts out all the intermediate steps, allowing for a greatly reduced state size.
 
 #### prune_state_actions():
-This function prunes the MDP of all terminal brances. It does this by recursivly stepping back from the Terminal state to all previous states.
+This function prunes the MDP of all terminal branches. It does this by recursively stepping back from the Terminal state to all previous states.
 At each previous state, the function removes all actions that lead to the terminal state. If all the actions from the previous state are removed
 in this step, then the state is removed from the state set and the process is repeated.
 
@@ -217,12 +217,12 @@ This file contains the functions used by the scheduler agent class when traversi
 
 #### soft_task_learning(epsilon, gamma, num_samples=0)
 The soft task learning function learns the probability distributions of the task generator MDP by sampling. The algorithm can either calculate
-the number of samples from the epsilon and gamma parameters, or can set the number of sampless directly with the num_samples parameter. This function 
+the number of samples from the epsilon and gamma parameters or can set the number of samples directly with the num_samples parameter. This function 
 returns the estimated probability distributions for computation time and inter-arrival time for all the tasks in the system.
 
 #### hard_task_learning(epsilon, gamma, num_samples=0)
 The soft task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
-this function runs the prune_state_actions function on the MDP environment. It then performs the sampling step on the pruned MDP, so as to 
+this function runs the prune_state_actions function on the MDP environment. It then performs the sampling step on the pruned MDP, to 
 not enter the terminal state. Just as in the soft task function, the function can calculate the number of samples from the epsilon and gamma 
 parameters, or can set the number of sampless directly with the num_samples parameter. This function returns the estimated probability 
 distributions for computation time and inter-arrival time for all the tasks in the system.
@@ -243,8 +243,8 @@ across each episode.
 
 #### test_MCTS_policy(depth=10, num_samples=10, num_ep=1, rand=True):
 This function is similar to test_optimal_policy, except the actions chosen at each state are provided by an MCTS algorithm. The depth parameter
-indicatets to what depth the MCTS simulation should extend. The num_samples parameter corresponds to the number of simulation samples the MCTS
-algorithm should take from each action. the num_ep parameter indicates the number of episodes the test function should run for. Finally the 
+indicates to what depth the MCTS simulation should extend. The num_samples parameter corresponds to the number of simulation samples the MCTS
+algorithm should take from each action. the num_ep parameter indicates the number of episodes the test function should run for. Finally, the 
 rand parameter indicates the simulation policy the MCTS algorithm should use. If rand = True, the simulation step will use a random policy. 
 If rand = False, the simulation step will use an earliest-deadline-first policy. Just like test_optimal_policy, this function returns a dictionary
 with the total reward across each episode.
