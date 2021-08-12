@@ -38,13 +38,13 @@ Step 5. Check the output on the terminal window after running.
 
 # Testing main.py
 
-**Default Parameters for MDP Creation:** 
+#### **Default Parameters for MDP Creation:** 
 
 Enter Number of Tasks in the System (Int): 2
 
 Do you want to use the default task configuration? (y/n): y
 
-**Default Parameters for Task Set:** 
+#### **Default Parameters for Task Set:** 
 
 Enter Computation Probability Distribution for Task 0: {1 : 1.0} 
 
@@ -62,7 +62,7 @@ Enter Inter-Arrival Probability Distribution for Task 1: {4: 1.0}
 
 Enter Type of Task 1 (h/s): s
 
-**Default Parameters for MDP Creation (cont.):** 
+#### **Default Parameters for MDP Creation (cont.):** 
 
 Do you want a non-preemptible MDP? (y/n): n
 
@@ -76,7 +76,7 @@ Enter Convergence Parameter for Value Iteration (Float): 0.01
 
 Enter Number of Episodes for Testing (Int): 10
 
-**Default Parameters for MCTS Testing:**
+#### **Default Parameters for MCTS Testing:**
 
 Would you like to run MCTS? (y/n): y
 
