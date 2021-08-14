@@ -156,7 +156,7 @@ the number of samples from the epsilon and gamma parameters, or can set the numb
 returns the estimated probability distributions for computation time and inter-arrival time for all the tasks in the system.
 
 #### hard_task_learning(epsilon, gamma, num_samples=0)
-The soft task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
+The hard task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
 this function runs the prune_state_actions function on the MDP environment. It then performs the sampling step on the pruned MDP, so as to 
 not enter the terminal state. Just as in the soft task function, the function can calculate the number of samples from the epsilon and gamma 
 parameters, or can set the number of samples directly with the num_samples parameter. This function returns the estimated probability 
@@ -221,7 +221,7 @@ the number of samples from the epsilon and gamma parameters or can set the numbe
 returns the estimated probability distributions for computation time and inter-arrival time for all the tasks in the system.
 
 #### hard_task_learning(epsilon, gamma, num_samples=0)
-The soft task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
+The hard task learning function learns the probability distributions of the task generator MDP by sampling. Before running the sampling step, 
 this function runs the prune_state_actions function on the MDP environment. It then performs the sampling step on the pruned MDP, to 
 not enter the terminal state. Just as in the soft task function, the function can calculate the number of samples from the epsilon and gamma 
 parameters, or can set the number of sampless directly with the num_samples parameter. This function returns the estimated probability 
