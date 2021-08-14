@@ -18,6 +18,16 @@ class scheduler_uam:
 
 
     def MCTS(self, state, depth, samples, discount = 0.5, rand=True):
+        """Documentation for the MCTS method:
+
+                This method runs the MCTS algorithm from a specified depth and returns the scheduler action with the
+                maximum estimated reward. The samples parameter dictates how many samples the method takes for each
+                action. The discount parameter represents the discount placed on future rewards. Finally the rand
+                parameter dictates the simulation policy used by the method. If rand equals True, then the method
+                will use a random simulation policy. If rand equals false, then it will use Earliest Deadline First.
+
+        """
+
         cur_state = state
         out_action = None
         self.children = {}
@@ -38,6 +48,16 @@ class scheduler_uam:
         return out_action, max_val
 
     def MCTS_simulation_step(self, cur_state, action, depth, cur_reward, discount = 1.0, rand=True):
+        """Documentation for the MCTS_simulation_step method:
+
+                This method is the recursive step of the MCTS function. It begins by stepping forward from the
+                cur_state by taking the given action. The method then adds the resulting reward to the cur_reward
+                parameter as the total reward for the simulation step. Afterward, the performs a recursive call with
+                depth-1. Once depth equals 0, the method returns the total accrued reward, multiplying by the
+                discount parameter at each break-out step.
+
+        """
+
         if depth == 0:
             total_reward = cur_reward
             return total_reward
@@ -69,6 +89,16 @@ class scheduler_uam:
         return discount * total_reward
 
     def soft_task_learning(self, epsilon, gamma, num_samples=0):
+        """Documentation for the soft_task_learning method:
+
+                The soft task learning function learns the probability distributions of the task generator MDP by
+                sampling. The algorithm can either calculate the number of samples from the epsilon and gamma
+                parameters or can set the number of samples directly with the num_samples parameter. This function
+                returns the estimated probability distributions for computation time and inter-arrival time for all
+                the tasks in the system.
+
+        """
+
         epsilion_1 = 1 / (math.pow(epsilon, 2) * 2)
         gamma_1 = numpy.log(2 * self.r) - numpy.log(gamma)
         self.prob_estimate_c = {}
@@ -83,6 +113,18 @@ class scheduler_uam:
         return self.prob_estimate_c, self.prob_estimate_a
 
     def hard_task_learning(self, epsilon, gamma, num_samples = 0):
+        """Documentation for the hard_task_learning method:
+
+                The hard task learning function learns the probability distributions of the task generator MDP by
+                sampling. Before running the sampling step, this function runs the prune_state_actions function on
+                the MDP environment. It then performs the sampling step on the pruned MDP, to not enter the terminal
+                state. Just as in the soft task function, the function can calculate the number of samples from the
+                epsilon and gamma parameters, or can set the number of sampless directly with the num_samples
+                parameter. This function returns the estimated probability distributions for computation time and
+                inter-arrival time for all the tasks in the system.
+
+        """
+
         epsilion_1 = 1 / (math.pow(epsilon, 2) * 2)
         gamma_1 = numpy.log(2 * self.r) - numpy.log(gamma)
         self.prob_estimate_c = {}
@@ -99,6 +141,20 @@ class scheduler_uam:
         return self.prob_estimate_c, self.prob_estimate_a
 
     def learning_phase_hard(self, task_index):
+        """Documentation for the learning_phase_hard method:
+
+                This method is the sampling step of the hard_task_learning function. The method begins by creating
+                two counters, one for computation time and one for inter-arrival time. The method also creates a
+                dictionary of time_step counters for computation and inter-arrival time. The method then steps
+                through the MDP, taking the task_index action at each time step. In the even that the task_index
+                action is not allowed in the pruned MDP, the method chooses another action from the available list.
+                Every time the job at the task_index completes or is replaced by a new instance of the same job,
+                the method increments the corresponding counters and counter dictionaries. After reaching the set
+                number of samples, the function estimates the probability distributions by dividing the entries in
+                the counter dictionaries by the total counters.
+
+        """
+
         self.MDP.prune_state_actions()
         temp_counter_c = {}
         temp_counter_a = {}
@@ -171,6 +227,19 @@ class scheduler_uam:
             self.prob_estimate_a[task_index][key] = temp_counter_a[key] / float(counter_a)
 
     def learning_phase(self, task_index):
+        """Documentation for the learning_phase method:
+
+                This method is the sampling step of the hard_task_learning function. The method begins by creating
+                two counters, one for computation time and one for inter-arrival time. The method also creates a
+                dictionary of time_step counters for computation and inter-arrival time. The method then steps
+                through the MDP, taking the task_index action at each time step. Every time the job at the
+                task_index completes or is replaced by a new instance of the same job, the method increments the
+                corresponding counters and counter dictionaries. After reaching the set number of samples,
+                the function estimates the probability distributions by dividing the entries in the counter
+                dictionaries by the total counters.
+
+        """
+
         temp_counter_c = {}
         temp_counter_a = {}
         temp_counter_t = 0
@@ -212,6 +281,15 @@ class scheduler_uam:
         return [self.prob_estimate_c, self.prob_estimate_a]
 
     def make_estimate_MDP(self, depth):
+        """Documentation for the make_estimate_MDP method:
+
+                This function uses the probability distributions learned in the hard_task_learning or
+                soft_task_learning functions to generate an estimate MDP. This function creates a new task_gen_MDP
+                object with the estimated task set. The function then runs the generate_MDP function to set up all
+                aspects of the estimated MDP
+
+        """
+
         new_task_list = []
         for task_index in self.prob_estimate_a:
             new_task_list.append(task(self.prob_estimate_c[task_index], self.MDP.task_list[task_index].d_i, self.prob_estimate_a[task_index], hard=self.MDP.task_list[task_index].hard))
@@ -220,11 +298,27 @@ class scheduler_uam:
         return self.estimate_MDP
 
     def optimal_policy(self, conv_param):
+        """Documentation for the optimal_policy method:
+
+                This function runs value_iteration and set_policy to obtain the optimal policy of the estimated MDP.
+
+        """
+
         self.estimate_MDP.value_iteration(conv_param)
         out_pol = self.estimate_MDP.set_policy()
         return out_pol
 
     def test_optimal_policy(self, policy, num_ep=1):
+        """Documentation for the test_optimal_policy method:
+
+                This function steps through the estimated MDP, choosing an action from the provided policy dictionary
+                at each step. The agent begins at the initial state of the MDP, and continues to step until it
+                returns to the initial state or enters the terminal state. During this process, the agent records the
+                total reward it accrues. This process is repeated num_ep times. This function returns a dictionary
+                with the total reward across each episode.
+
+        """
+
         reward_dict = {}
         reward = 0
         for episode in range(1, 1 + num_ep):
@@ -247,6 +341,19 @@ class scheduler_uam:
         return reward_dict
 
     def test_MCTS_policy(self, depth=20, num_samples=10, num_ep=1, rand=True):
+        """Documentation for the test_MCTS_policy method:
+
+                This function is similar to test_optimal_policy, except the actions chosen at each state are provided
+                by an MCTS algorithm. The depth parameter indicates to what depth the MCTS simulation should extend.
+                The num_samples parameter corresponds to the number of simulation samples the MCTS algorithm should
+                take from each action. the num_ep parameter indicates the number of episodes the test function should
+                run for. Finally, the rand parameter indicates the simulation policy the MCTS algorithm should use.
+                If rand = True, the simulation step will use a random policy. If rand = False, the simulation step
+                will use an earliest-deadline-first policy. Just like test_optimal_policy, this function returns a
+                dictionary with the total reward across each episode.
+
+        """
+
         reward_dict = {}
         reward = 0
         for episode in range(1, 1 + num_ep):
