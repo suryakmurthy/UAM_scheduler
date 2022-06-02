@@ -3,6 +3,7 @@ import numpy
 import itertools
 from task_generator import task_generator
 from job import job
+import time
 
 class uam_mdp:
     def __init__(self, task_list):
@@ -224,7 +225,7 @@ class uam_mdp:
         if cur_state == ["Terminal"]:
             ret_bool = True
         else:
-            if action != None and 0 in cur_state[action].c_i.keys() and cur_state[action].c_i[0] == 1.0:
+            if action != None and ((0 in cur_state[action].c_i.keys() and cur_state[action].c_i[0] == 1.0) or (cur_state[action].is_same(self.task_list[action]) and rec_step == True)):
                 ret_bool = True
         if ret_bool:
             if not rec_step:
@@ -277,7 +278,7 @@ class uam_mdp:
                 new_reward = 0
                 new_prob = action_dist[task_action]
                 if next_sched_state == ["Terminal"]:
-                    new_reward -= 100000
+                    new_reward -= 10000000
                 else:
                     for sub_job in next_sched_state:
                         if sub_job.d_i == 0 and not (0 in sub_job.c_i and sub_job.c_i[0] == 1.0):
@@ -595,6 +596,7 @@ class uam_mdp:
         # Probability design decision
         prob_1 = self.check_in_states_s(state)
         prob_2 = self.check_in_states_s(next_state)
+
         if prob_1[0] and prob_2[0]:
             if (prob_1[1], action, prob_2[1]) in self.reward.keys():
                 return self.reward[(prob_1[1], action, prob_2[1])]
@@ -613,8 +615,11 @@ class uam_mdp:
         self.value = numpy.zeros(len(self.state_list_scheduler))
         self.convergence = conv_parameter
         self.finish_iteration = False
+        counter = 0
         while not self.finish_iteration:
+            counter += 1
             self.value_calculation()
+        print("iteration_counter: ", counter)
 
     def value_calculation(self):
         """Documentation for the value_calculation method:
@@ -628,26 +633,38 @@ class uam_mdp:
 
         value_k = self.value.copy()
         count = 0
+        temp_val = 0
+        # # print("size: ",  len(self.state_list_scheduler))
         for state in self.state_list_scheduler:
-            if self.check_in_states_s(state)[0]:
-                t = True
-            else:
-                t = False
-            count += 1
             total = [None] * len(self.state_actions[state])
             for index_1 in range(0, len(self.state_actions[state])):
+                # # # print("index_1: ", index_1)
                 action = self.state_actions[state][index_1]
                 total[index_1] = 0
                 for next_state in self.state_list_scheduler:
-                    add_prob = self.transition(state, action, next_state)
-                    add_reward = self.get_reward(state, action, next_state)
+                    count += 1
+                    tic = time.time()
+                    # add_prob = self.transition(state, action, next_state)
+                    if (state, action, next_state) in self.prob:
+                        add_prob = self.prob[(state, action, next_state)]
+                    else:
+                        add_prob = 0
+                    # # # print("time_1: ", toc - tic)
+                    if (state, action, next_state) in self.reward.keys():
+                        add_reward = self.reward[(state, action, next_state)]
+                    else:
+                        add_reward = 0
+                    # add_reward = self.get_reward(state, action, next_state)
                     add_disc = self.discount * self.value[self.state_list_scheduler.index(next_state)]
                     add_total = (add_prob * ((add_reward) + (add_disc)))
                     total[index_1] += add_total
+                    toc = time.time()
+                    time_temp = toc - tic
+                    temp_val += time_temp
                 self.q_table[(state, action)] = total[index_1]
-
             value_k[self.state_list_scheduler.index(state)] = max(total)
         finish_counter = 0
+        print("Avg comp time: ", temp_val / count)
         for index in range(self.value.size):
             if abs(self.value[index] - value_k[index]) <= self.convergence:
                 finish_counter += 1
@@ -660,7 +677,7 @@ class uam_mdp:
 
              This function returns all of the possible next scheduler states from a given state and action. The
              function returns a probability and reward dictionary which associate each next state with their
-             transition probability and reward. 
+             transition probability and reward.
         """
 
         next_states = self.possible_next(state, action_list=[action])[0]
