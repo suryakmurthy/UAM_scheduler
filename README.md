@@ -9,11 +9,11 @@ python --version
 
 ## Versions of Packages used with Code:
 
-numpy 1.18.5
+numpy 1.18.5 - https://numpy.org/doc/stable/
 
-scipy 1.5.4
+scipy 1.5.4 - https://scipy.org/
 
-matplotlib 3.3.3
+matplotlib 3.3.3 - https://matplotlib.org/
 
 ## Download Instructions:
 
