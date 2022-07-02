@@ -7,7 +7,7 @@ This program has been tested with python ver 2.7. Can check your python version 
 
 python --version 
 
-## Versions of Packages used with Code:
+## Versions of Packages used with Code (Please Install in the Following Order):
 
 numpy 1.18.5 - https://numpy.org/doc/stable/
 
