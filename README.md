@@ -7,7 +7,7 @@ This program has been tested with python ver 2.7. Can check your python version 
 
 python --version 
 
-If your python version is not 2.7, please use Anaconda or perform an install in a clean environment.
+If your python version is not 2.7, please use Anaconda or perform an install in a clean environment (i.e Remove current version of python and all associated packages).
 
 ## Versions of Packages used with Code (Please Install in the Following Order):
 
