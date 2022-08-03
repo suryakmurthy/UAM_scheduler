@@ -637,7 +637,6 @@ class uam_mdp:
         value_k = self.value.copy()
         count = 0
         temp_val = 0
-        some_counter = 0
         for state in self.state_list_scheduler:
             total = [None] * len(self.state_actions[state])
             for index_1 in range(0, len(self.state_actions[state])):
@@ -661,11 +660,7 @@ class uam_mdp:
                     time_temp = toc - tic
                     temp_val += time_temp
                 self.q_table[(state, action)] = total[index_1]
-            value_k_prev = value_k[self.state_list_scheduler.index(state)]
             value_k[self.state_list_scheduler.index(state)] = max(total)
-            if value_k_prev != value_k[self.state_list_scheduler.index(state)]:
-                some_counter += 1
-        print("count: ", some_counter)
         if max([abs(self.value[index] - value_k[index]) for index in range(self.value.size)]) < self.convergence:
             self.finish_iteration = True
         self.value = value_k.copy()
