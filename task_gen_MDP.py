@@ -174,11 +174,6 @@ class task_gen_mdp:
         next_states = []
         for action in self.actions_scheduler:
             next_state = self.next_state_scheduler(cur_state, action)
-            # if next_state != ["Terminal"] and next_state[0].return_data() == ({1: 0.5, 2: 0.5}, 1, {2: 1.0}) and next_state[1].return_data() == ({0: 1.0}, 0, {0: 1.0}):
-                # # print("check_gen")
-                # for job_2 in cur_state:
-                    # # print job_2.return_data(),
-                # # print(" ")
             in_states_s = self.check_in_states_t(tuple(next_state))
             if in_states_s[0] == True:
                 next_state = list(in_states_s[1])
@@ -205,15 +200,14 @@ class task_gen_mdp:
             self.prob[(tuple(cur_state), action, tuple(next_state))] = 1
             if tuple(next_state) not in self.prior_state_dict:
                 self.prior_state_dict[(tuple(next_state))] = []
-            # if cur_state != ["Terminal"] and cur_state[0].return_data() == (({1: 0.5, 2: 0.5}, 1, {2: 1.0})):
-            #     # # print("cur_state:", next_state[0].return_data())
             self.prior_state_dict[(tuple(next_state))].append((tuple(cur_state), action))
-            # if next_state != ["Terminal"] and next_state[0].return_data() == ({1: 0.5, 2: 0.5}, 1, {2: 1.0}) and next_state[1].return_data() == ({0: 1.0}, 0, {0: 1.0}):
-                # # print("check_gen prior: ", self.prior_state_dict[(tuple(next_state))])
             self.reward[(tuple(cur_state), action, tuple(next_state))] = 0
             for element in next_state:
                 if element == "Terminal" or element.failed:
-                    self.reward[(tuple(cur_state), action, tuple(next_state))] += -10000000
+                    if cur_state != "Terminal":
+                        self.reward[(tuple(cur_state), action, tuple(next_state))] += -10000000
+                    else:
+                        self.reward[(tuple(cur_state), action, tuple(next_state))] += 0
                     break
                 if element.d_i == 0 and ((0 not in element.c_i) or (element.c_i[0] != 1.0)) and element.h_s == False:
                     self.reward[(tuple(cur_state), action, tuple(next_state))] = -10
@@ -222,9 +216,6 @@ class task_gen_mdp:
             task_actions = self.t_g.ret_possible_actions(state, prev_state=cur_state)
             for action in task_actions:
                 next_state = self.next_state_task(state, action)
-                # if state != ["Terminal"] and state[0].return_data() == ({1: 0.5, 2: 0.5}, 1, {2: 1.0}) and \
-                #         state[1].return_data() == ({0: 1.0}, 0, {0: 1.0}):
-                    # # print("check_gen task: ", next_state[0].return_data(), next_state[1].return_data(), action)
                 in_states_t = self.check_in_states_s(tuple(next_state))
                 if in_states_t[0] == True:
                     next_state = list(in_states_t[1])
@@ -241,7 +232,10 @@ class task_gen_mdp:
                 self.reward[(tuple(state), action, tuple(next_state))] = 0
                 for element in next_state:
                     if element == "Terminal" or element.failed:
-                        self.reward[(tuple(state), action, tuple(next_state))] += -10000000
+                        if state != "Terminal":
+                            self.reward[(tuple(state), action, tuple(next_state))] += -10000000
+                        else:
+                            self.reward[(tuple(state), action, tuple(next_state))] += 0
                         break
                     if element.d_i == 0 and ((0 not in element.c_i) or (element.c_i[0] != 1.0)) and element.h_s == False:
                         self.reward[(tuple(state), action, tuple(next_state))] += 0
@@ -280,29 +274,14 @@ class task_gen_mdp:
                 then the state is removed from the state set and the process is repeated.
 
         """
-        # # print("pruning state actions")
         self.new_states = self.state_list_scheduler
         R = [tuple(["Terminal"])]
         T = [tuple(["Terminal"])]
-        t = R[0]
-        # # # print("pos_prior: ")
-        # for val in self.possible_prior(t):
-        #     state = val[0]
-        #     for job_1 in state:
-        #         if job_1 == "Terminal":
-        #             # # print job_1,
-        #         else:
-        #             # # print job_1.return_data(),
-        #     # # print(" ")
         while R != []:
             t = R[0]
             new_R = list(R)
             new_R.remove(t)
-            # if t != tuple(["Terminal"]):
-                # # print("t: ", t[0].return_data(), t[1].return_data())
             prior_states = self.possible_prior(t)
-
-            # if (t != tuple(["Terminal"])) and (t[0].return_data() == ({2: 1.0}, 1, {2: 1.0})):
 
             for (state, action) in prior_states:
                 if state != t:
@@ -590,7 +569,7 @@ class task_gen_mdp:
             This method is a loop for the value calculation method. It takes a k parameter and iterates the
             value_calculation method k times.
         """
-        self.discount = discount
+        self.discount = 0.90
         self.value = numpy.zeros(len(self.state_list_scheduler))
         self.convergence = conv_parameter
         self.finish_iteration = False
@@ -599,7 +578,6 @@ class task_gen_mdp:
             counter += 1
             self.value_calculation()
         print("num_iter: ", counter)
-        # print(counter, conv_parameter)
 
     def value_calculation(self):
         """Documentation for the value_calculation method:
@@ -613,7 +591,6 @@ class task_gen_mdp:
         value_k = self.value.copy()
         count = 0
         temp_val = 0
-        # # print("size: ", len(self.state_list_scheduler))
         for state in self.state_list_scheduler:
             total = [None] * len(self.state_actions[state])
             for index_1 in range(0, len(self.state_actions[state])):
@@ -623,8 +600,6 @@ class task_gen_mdp:
                     count += 1
                     tic = time.time()
                     add_prob = self.transition_mod(state, action, next_state)
-                    # toc = time.time()
-                    # # # print("time_2: ", toc - tic)
                     add_reward = self.reward_mod(state, action, next_state)
                     add_disc = self.discount * self.value[self.state_list_scheduler.index(next_state)]
                     add_total = (add_prob * ((add_reward) + (add_disc)))
@@ -632,11 +607,8 @@ class task_gen_mdp:
                     toc = time.time()
                     temp_val += (toc - tic)
                 self.q_table[(state, action)] = total[index_1]
-            # # print(self.q_table)
             value_k[self.state_list_scheduler.index(state)] = max(total)
         finish_counter = 0
-        # print("total_iterations: ", count)
-        print("Avg comp time: ", temp_val / count)
         for index in range(self.value.size):
             if abs(self.value[index] - value_k[index]) <= self.convergence:
                 finish_counter += 1
@@ -655,32 +627,14 @@ class task_gen_mdp:
         self.new_reward = {}
         self.new_prior_state_dict = {tuple(self.job_list): []}
         for state in self.state_list_scheduler:
-            # # # print("state: ")
-            # for job_1 in state:
-            #     if job_1 == "Terminal":
-            #         # # print job_1,
-            #     else:
-            #         # # print job_1.return_data(),
-            # # # print(" ")
             for action in self.actions_scheduler:
                 next_state, next_rew = self.possible_next_scheduler(state, action)
                 for state_2 in next_state.keys():
                     self.new_transition[(state, action, state_2)] = next_state[state_2]
                     self.new_reward[(state, action, state_2)] = next_rew[state_2]
-                    # {1: 0.5, 2: 0.5}, 1, {2: 1.0}), ({0: 1.0}, 0, {0: 1.0}
-                    # # print("state_2: ")
-                    # for job_1 in state_2:
-                    #     if job_1 == "Terminal":
-                    #         # # print job_1,
-                    #     else:
-                    #         # # print job_1.return_data(),
-                    # # # print(" ")
                     if state_2 not in self.new_prior_state_dict:
                         self.new_prior_state_dict[state_2] = []
                     self.new_prior_state_dict[state_2].append((state, action))
-        # # # print("pre: ", self.prior_state_dict)
-        # self.prior_state_dict = new_prior_state_dict
-        # # # print("post: ", self.prior_state_dict)
 
 
     def possible_next_scheduler(self, state, action):
@@ -726,22 +680,6 @@ class task_gen_mdp:
               reward function, but it only works if state and next_state are both scheduler states.
         """
         if (state, action, next_state) in self.new_reward:
-            # # # print "MCTS Current State: ",
-            # for job_1 in state:
-            #     if job_1 == "Terminal":
-            #         # # print job_1,
-            #     else:
-            #         # # print job_1.return_data(),
-            # # # print(" ")
-            # # # print("action: ", action)
-            # # # print "MCTS Next State: ",
-            # for job_1 in next_state:
-            #     if job_1 == "Terminal":
-            #         # # print job_1,
-            #     else:
-            #         # # print job_1.return_data(),
-            # # # print(" ")
-            # # # print("reward: ", self.new_reward[(state, action, next_state)])
             return self.new_reward[(state, action, next_state)]
         else:
             return 0
