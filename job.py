@@ -64,14 +64,8 @@ class job:
         return tuple([self.c_i, self.d_i, self.a_i])
 
     def is_same(self, other):
-        # # print("current: ", self.c_i, self.d_i, self.a_i)
-        # # print("other: ", other.c_i, other.d_i, other.a_i)
         if self.c_i == other.c_i and self.d_i == other.d_i and self.a_i == other.a_i: #and self.failed == other.failed and self.past_deadline == other.past_deadline:
-            # # print("returning True: ", )
-            # # print(" ")
             return True
-        # # print("returning False")
-        # # print(" ")
         return False
 
     def return_key(self):
