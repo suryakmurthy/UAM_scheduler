@@ -3,7 +3,7 @@ from task import task
 import math
 import numpy
 from task_gen_MDP import task_gen_mdp
-
+import time
 class scheduler:
     def __init__(self, generator_object):
         self.MDP = generator_object
@@ -16,7 +16,7 @@ class scheduler:
         self.r = len(self.MDP.prob)
 
 
-    def MCTS(self, state, depth, samples, discount = 0.5, rand=True):
+    def MCTS(self, state, depth, samples, discount = 1.0, rand=True):
         """Documentation for the MCTS method:
 
                 This method runs the MCTS algorithm from a specified depth and returns the scheduler action with the
@@ -39,10 +39,29 @@ class scheduler:
                 val_reward += self.MCTS_simulation_step(cur_state, action, depth, total_reward, discount = discount, rand=rand)
             self.act_val[action] = float(val_reward) / float(samples)
             val_list.append(float(val_reward) / float(samples))
+        key_list = list(self.act_val.keys())
         max_val = max(val_list)
-        for key, value in self.act_val.items():
-            if value == max_val:
-                out_action = key
+        while val_list != []:
+            max_index = val_list.index(max_val)
+            key = key_list[max_index]
+            e_d = -1
+            if key != None:
+                if (state[key].d_i < e_d or e_d == -1):
+                    if (0 not in state[key].c_i or state[key].c_i[0] != 1):
+                        out_action = key
+                        break
+                    else:
+                        del val_list[max_index]
+                        del key_list[max_index]
+                        if (len(val_list) > 0):
+                            max_val = max(val_list)
+                else:
+                    del val_list[max_index]
+                    del key_list[max_index]
+                    if(len(val_list) > 0):
+                        max_val = max(val_list)
+            else:
+                out_action = None
                 break
         return out_action, max_val
 
@@ -62,21 +81,23 @@ class scheduler:
             return total_reward
         next_state, total_reward = self.estimate_MDP.next_state_scheduler_mod(tuple(cur_state), action)
         next_state_1 = self.estimate_MDP.check_in_states_s(tuple(next_state))[1]
+        action_list = self.estimate_MDP.state_actions[tuple(next_state_1)]
         if rand:
-            next_action = random.choice(list(range(0, len(next_state_1))))
+            next_action = random.choice(action_list)
         else:
             if next_state_1 == tuple(["Terminal"]):
                 next_action = None
             else:
                 hard_deadline_dict = {}
                 soft_deadline_dict = {}
-                for job_index in range(0, len(cur_state)):
-                    if next_state_1[job_index].h_s == True and next_state_1[job_index].d_i != 0:
-                        if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
-                            hard_deadline_dict[job_index] = next_state_1[job_index].d_i
-                    if next_state_1[job_index].h_s == False and next_state_1[job_index].d_i != 0:
-                        if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
-                            soft_deadline_dict[job_index] = next_state_1[job_index].d_i
+                for job_index in self.estimate_MDP.state_actions[cur_state]:
+                    if job_index != None:
+                        if next_state_1[job_index].h_s == True and next_state_1[job_index].d_i != 0:
+                            if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
+                                hard_deadline_dict[job_index] = next_state_1[job_index].d_i
+                        if next_state_1[job_index].h_s == False and next_state_1[job_index].d_i != 0:
+                            if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
+                                soft_deadline_dict[job_index] = next_state_1[job_index].d_i
                 next_action = None
                 if hard_deadline_dict != {}:
                     next_action = min(hard_deadline_dict, key=hard_deadline_dict.get)
@@ -293,6 +314,7 @@ class scheduler:
             new_task_list.append(task(self.prob_estimate_c[task_index], self.MDP.task_list[task_index].d_i, self.prob_estimate_a[task_index], hard=self.MDP.task_list[task_index].hard))
         self.estimate_MDP = task_gen_mdp(new_task_list)
         self.estimate_MDP.generate_MDP(depth)
+
         return self.estimate_MDP
 
     def optimal_policy(self, conv_param):
@@ -301,10 +323,12 @@ class scheduler:
                 This function runs value_iteration and set_policy to obtain the optimal policy of the estimated MDP.
 
         """
-
+        tic = time.time()
         self.estimate_MDP.value_iteration(conv_param)
+        toc = time.time()
+        time_val = toc - tic
         out_pol = self.estimate_MDP.set_policy()
-        return out_pol
+        return out_pol, time_val
 
     def test_optimal_policy(self, policy, num_ep=1):
         """Documentation for the test_optimal_policy method:
@@ -351,16 +375,23 @@ class scheduler:
                 dictionary with the total reward across each episode.
 
         """
-
         reward_dict = {}
         reward = 0
+        time_counter = 0
+        time_total = 0
+        time_list = []
         for episode in range(1, 1 + num_ep):
             finished_bool = False
             temp_state = self.estimate_MDP.ret_start_state()
             start_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
             current_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
             while not finished_bool:
+                time_counter += 1
+                time_count_MCTS = time.time()
                 action, out_val = self.MCTS(current_state, depth, num_samples, rand=rand)
+                time_count_end = time.time()
+                time_list.append(time_count_end - time_count_MCTS)
+                time_total += time_count_end - time_count_MCTS
                 temp_state, next_bool = self.estimate_MDP.scheduler_step(current_state, action)
                 next_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
                 reward += self.estimate_MDP.reward_mod(current_state, action, next_state)
@@ -370,6 +401,5 @@ class scheduler:
                 if self.estimate_MDP.check_if_equal(current_state, start_state) == True:
                     finished_bool = True
             reward_dict[episode] = reward
-
-        return reward_dict
+        return reward_dict, time_total, time_counter
 
