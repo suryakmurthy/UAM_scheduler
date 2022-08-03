@@ -78,7 +78,6 @@ if __name__ == "__main__":
         num_samples = int(num_samples)
     else:
         num_samples = 1000
-    # for num_samples in num_samples_1:
     if hard_val:
         prob_c, prob_a = sched.hard_task_learning(0.1, 0.1, num_samples=num_samples)
     else:
@@ -88,14 +87,11 @@ if __name__ == "__main__":
     conv_val = raw_input("Enter Convergence Parameter for Value Iteration (Float): ")
     if not conv_val:
         conv_val = 0.01
-    # tic = time.time()
     total_time = 0
     for i in range (0, 20):
         pol_1, time_val = sched.optimal_policy(conv_val)
         total_time += time_val
         print("Val iteration Time value: ", i, time_val)
-
-    # toc = time.time()
     print("Value iteration comp time: ", total_time / 20)
     print("Value Iteration Optimal Policy: ")
     for state in sched.estimate_MDP.state_list_scheduler:
@@ -125,7 +121,6 @@ if __name__ == "__main__":
             print("i: ", i, "rew: ", rew_temp)
     for key in reward.keys():
         reward[key] = float(reward[key]) / float(1000)
-    # reward = sched.test_optimal_policy(pol_1, num_ep=num_ep)
     print("Value Iteration Reward Output: ", reward)
     MCTS_bool = raw_input("Would you like to run MCTS? (y/n): ")
     if not MCTS_bool:
@@ -177,7 +172,6 @@ if __name__ == "__main__":
         else:
             std_dev_list = []
             for i in range(1, 1001):
-                # print("episode: ", i)
                 MCTS_rew_sub, time_total, time_counter = sched.test_MCTS_policy(depth=MCTS_depth, num_samples=MCTS_sample, num_ep=MCTS_ep, rand=True)
                 std_dev_list.append(MCTS_rew_sub[10])
                 for key in MCTS_rew_sub.keys():
@@ -198,6 +192,5 @@ if __name__ == "__main__":
                     print("Average MCTS time: ", float(time_total) / float(time_counter))
             for key in MCTS_rew.keys():
                 MCTS_rew[key] = float(MCTS_rew[key]) / float(1000)
-            # MCTS_rew = sched.test_MCTS_policy(depth=MCTS_depth, num_samples=MCTS_sample, num_ep=MCTS_ep, rand=True)
         print("MCTS Reward Output: ", MCTS_rew)
     print("Process Completed")
