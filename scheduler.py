@@ -401,5 +401,5 @@ class scheduler:
                 if self.estimate_MDP.check_if_equal(current_state, start_state) == True:
                     finished_bool = True
             reward_dict[episode] = reward
-        return reward_dict, time_total, time_counter
+        return reward_dict
 
