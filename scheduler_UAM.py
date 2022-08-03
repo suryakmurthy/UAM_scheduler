@@ -67,7 +67,6 @@ class scheduler_uam:
         total_reward = self.estimate_MDP.get_reward(tuple(cur_state), action, next_state_1)
         action_list = self.estimate_MDP.state_actions[tuple(next_state_1)]
         if rand:
-            # print("choosing random action")
             next_action = random.choice(action_list)
         else:
             if next_state_1 == tuple(["Terminal"]):
@@ -132,10 +131,8 @@ class scheduler_uam:
         for task_index in range(0, len(self.MDP.task_list)):
             task = self.MDP.task_list[task_index]
             if not task.hard:
-                # print("checking soft task")
                 task_bool = False
                 for state in self.MDP.new_states:
-                    # print("checking state: ", state[0].return_data(), state[1].return_data(), self.MDP.state_actions[state])
                     if task_index in self.MDP.state_actions[state] and (0 not in state[task_index].c_i or state[task_index].c_i[0] != 1.0):
                         task_bool = True
                         break
@@ -145,7 +142,6 @@ class scheduler_uam:
             else:
                 self.new_task_list.append(task)
                 new_task_index_list.append(task_index)
-        # print("new_task_index_list: ", new_task_index_list)
         epsilion_1 = 1 / (math.pow(epsilon, 2) * 2)
         gamma_1 = numpy.log(2 * self.r) - numpy.log(gamma)
         self.prob_estimate_c = {}
@@ -193,11 +189,8 @@ class scheduler_uam:
         self.interm_estimate_c[task_index] = {}
         self.interm_estimate_a[task_index] = {}
         while counter_a < self.num_samples or counter_c < self.num_samples:
-            # print("hard task learning: ", counter_a, counter_c, task_index)
-            # print("checking state: ", current_state[0].return_data(), current_state[1].return_data(), self.MDP.state_actions[current_state], finished_bool)
             if current_state != tuple(["Terminal"]) and current_state != ["Terminal"] and (
                     current_state[task_index].finish()) and finished_bool == False:
-                # print("reached finish")
                 counter_c += 1
                 finished_bool = True
                 if time_count_c not in temp_counter_c:
@@ -211,7 +204,6 @@ class scheduler_uam:
                 deadline_ex = (start_job.d_i - current_state[task_index].d_i)
                 temp_count = (time_count - deadline_ex) + deadline_prev
                 deadline_prev = copy.deepcopy(deadline_ex)
-                # print("replacing: ", time_count, temp_count, deadline_ex)
                 if temp_count not in temp_counter_a:
                     temp_counter_a[temp_count] = 1
                 else:
@@ -336,7 +328,6 @@ class scheduler_uam:
         self.estimate_MDP.value_iteration(conv_param)
         toc = time.time()
         time_val = toc - tic
-        # print("Value iteration comp time: ", time_val)
         out_pol = self.estimate_MDP.set_policy()
         return out_pol, time_val
 
@@ -354,13 +345,11 @@ class scheduler_uam:
         reward_dict = {}
         reward = 0
         for episode in range(1, 1 + num_ep):
-            # print('episode: ', episode)
             finished_bool = False
             temp_state = self.estimate_MDP.ret_start_state()
             start_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
             current_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
             while not finished_bool:
-                # print('loop infinite?: ', episode)
                 action = policy[current_state]
                 temp_state, next_bool, time_val = self.estimate_MDP.scheduler_step(current_state, action)
                 next_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
@@ -392,19 +381,11 @@ class scheduler_uam:
         reward = 0
         time_counter = 0
         time_total = 0
-        # print("num_ep: ", num_ep, range(1, 1+num_ep))
         for episode in range(1, 1 + num_ep):
             finished_bool = False
             temp_state = self.estimate_MDP.ret_start_state()
             start_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
             current_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
-            # print "MCTS Start State: ",
-            # for job_0 in current_state:
-            #     if job_0 == "Terminal":
-            #         print job_0,
-            #     else:
-            #         print job_0.return_data(),
-            # print(" ")
             time_list = []
             while not finished_bool:
                 time_counter += 1
@@ -416,29 +397,11 @@ class scheduler_uam:
                 temp_state, next_bool, time_val = self.estimate_MDP.scheduler_step(current_state, action)
                 next_state = self.estimate_MDP.check_in_states_s(temp_state)[1]
                 reward += self.estimate_MDP.get_reward(current_state, action, next_state)
-                # print("Episode Number: ", episode)
-                # print "MCTS Current State: ",
-                # for job_1 in current_state:
-                #     if job_1 == "Terminal":
-                #         print job_1,
-                #     else:
-                #         print job_1.return_data(),
-                # print(" ")
-                # print "MCTS Next State: ",
-                # for job_2 in next_state:
-                #     if job_2 == "Terminal":
-                #         print job_2,
-                #     else:
-                #         print job_2.return_data(),
-                # print(" ")
-                # print("reward: ", reward)
                 current_state = next_state
                 if current_state == tuple(["Terminal"]):
                     finished_bool = True
                 if self.estimate_MDP.check_if_equal(current_state, start_state) == True:
                     finished_bool = True
-            # print("Average MCTS time: ", float(time_total)/float(time_counter))
             reward_dict[episode] = reward
 
         return reward_dict, time_total, time_counter
-
