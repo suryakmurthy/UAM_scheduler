@@ -31,15 +31,11 @@ class task_generator:
             action_dict["sub"] = c_prob * a_prob
             action_dict["e"] = 0
             action_dict["killANDsub"] = (1 - c_prob) * a_prob
-            # print("pre_case: ", c_prob, a_prob)
             if c_prob != 1:
-                # print("case_1")
                 action_dict["e"] = (1 - c_prob) * (1 - a_prob)
             elif 0 in self.c_last[job_index].keys() and self.c_last[job_index][0] == 1:
-                # print("case_2")
                 action_dict["e"] = (1 - a_prob)
                 action_dict["fin"] = 0
-            # print("action_dict: ", action_dict)
             action_out = np.random.choice(action_dict.keys(), p=action_dict.values())
             if action_out == "killANDsub" or action_out == "sub":
                 self.c_last[job_index] = {}
@@ -80,11 +76,6 @@ class task_generator:
                 elif 0 in prev_state[job_index].c_i.keys() and prev_state[job_index].c_i[0] == 1:
                     action_dict["e"] = (1 - a_prob)
                     action_dict["fin"] = 0
-            # # print(c_prob, a_prob, action_dict)
-            # action_out = np.random.choice(action_dict.keys(), p=action_dict.values())
-            # if action_out == "killANDsub" or action_out == "sub":
-            #     self.c_last[job_index] = {}
-            # action_list.append(action_out)
             for key in action_dict.keys():
                 if action_dict[key] > 0:
                     sub_list.append(key)
@@ -97,12 +88,10 @@ class task_generator:
         action_list = []
         action_dict_1 = {}
         action_dict = []
-        # print("current_state: ", current_state)
         for job_index in range(0, len(current_state)):
             action_dict.append({})
             sub_list = []
             job = current_state[job_index]
-            # print("job: ", job)
             if job == "Terminal":
                 for task in self.task_list:
                     action_list.append("e")
@@ -140,11 +129,7 @@ class task_generator:
         output = list(itertools.product(*action_list))
         for action_index in range(0, len(output)):
             action_dict_1[tuple(output[action_index])] = 1
-            # print("output[action_1]: ", output[action_index])
-            # print("action_dict: ", action_dict)
             for action_index_2 in range(0, len(output[action_index])):
                 action = output[action_index][action_index_2]
-                # print("action: ", action, action_dict[action_index_2][action])
                 action_dict_1[tuple(output[action_index])] *= action_dict[action_index_2][action]
-        # print("action_dict_1: ", action_dict_1)
         return action_dict_1
