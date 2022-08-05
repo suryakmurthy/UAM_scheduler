@@ -608,11 +608,7 @@ class task_gen_mdp:
                     temp_val += (toc - tic)
                 self.q_table[(state, action)] = total[index_1]
             value_k[self.state_list_scheduler.index(state)] = max(total)
-        finish_counter = 0
-        for index in range(self.value.size):
-            if abs(self.value[index] - value_k[index]) <= self.convergence:
-                finish_counter += 1
-        if finish_counter >= self.value.size - 1:
+        if max([abs(self.value[index] - value_k[index]) for index in range(self.value.size)]) < self.convergence:
             self.finish_iteration = True
         self.value = value_k.copy()
 
