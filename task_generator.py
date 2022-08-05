@@ -77,8 +77,8 @@ class task_generator:
 
         """
         action_list = []
-        action_dict = {}
         for job_index in range(0, len(current_state)):
+            action_dict = {}
             sub_list = []
             job = current_state[job_index]
             if job == "Terminal":
@@ -97,13 +97,13 @@ class task_generator:
             action_dict["sub"] = c_prob * a_prob
             action_dict["killANDsub"] = (1 - c_prob) * a_prob
             if prev_state == None:
-                if c_prob != 1:
+                if c_prob != 1 and a_prob != 1:
                     action_dict["e"] = (1 - c_prob) * (1 - a_prob)
                 elif 0 in self.c_last[job_index].keys() and self.c_last[job_index][0] == 1:
                     action_dict["e"] = (1 - a_prob)
                     action_dict["fin"] = 0
             else:
-                if c_prob != 1:
+                if c_prob != 1 and a_prob != 1:
                     action_dict["e"] = (1 - c_prob) * (1 - a_prob)
                 elif 0 in prev_state[job_index].c_i.keys() and prev_state[job_index].c_i[0] == 1:
                     action_dict["e"] = (1 - a_prob)
