@@ -204,13 +204,13 @@ class task_gen_mdp:
             self.reward[(tuple(cur_state), action, tuple(next_state))] = 0
             for element in next_state:
                 if element == "Terminal" or element.failed:
-                    if cur_state != "Terminal":
+                    if cur_state != ["Terminal"]:
                         self.reward[(tuple(cur_state), action, tuple(next_state))] += -10000000
                     else:
                         self.reward[(tuple(cur_state), action, tuple(next_state))] += 0
                     break
                 if element.d_i == 0 and ((0 not in element.c_i) or (element.c_i[0] != 1.0)) and element.h_s == False:
-                    self.reward[(tuple(cur_state), action, tuple(next_state))] = -10
+                    self.reward[(tuple(cur_state), action, tuple(next_state))] += -10
         next_scheduler_states = []
         for state in next_states:
             task_actions = self.t_g.ret_possible_actions(state, prev_state=cur_state)
@@ -232,7 +232,7 @@ class task_gen_mdp:
                 self.reward[(tuple(state), action, tuple(next_state))] = 0
                 for element in next_state:
                     if element == "Terminal" or element.failed:
-                        if state != "Terminal":
+                        if state != ["Terminal"]:
                             self.reward[(tuple(state), action, tuple(next_state))] += -10000000
                         else:
                             self.reward[(tuple(state), action, tuple(next_state))] += 0
@@ -569,7 +569,7 @@ class task_gen_mdp:
             This method is a loop for the value calculation method. It takes a k parameter and iterates the
             value_calculation method k times.
         """
-        self.discount = 0.90
+        self.discount = 0.99
         self.value = numpy.zeros(len(self.state_list_scheduler))
         self.convergence = conv_parameter
         self.finish_iteration = False

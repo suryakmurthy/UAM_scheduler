@@ -653,7 +653,11 @@ class uam_mdp:
                         add_reward = self.reward[(state, action, next_state)]
                     else:
                         add_reward = 0
-                    add_disc = self.discount * self.value[self.state_list_scheduler.index(next_state)]
+                    if (state, action, next_state) in self.time_steps.keys():
+                        add_time = self.time_steps[(state, action, next_state)]
+                    else:
+                        add_time = 1
+                    add_disc = pow(self.discount, add_time) * self.value[self.state_list_scheduler.index(next_state)]
                     add_total = (add_prob * ((add_reward) + (add_disc)))
                     total[index_1] += add_total
                     toc = time.time()
@@ -705,8 +709,12 @@ class uam_mdp:
                 index_1 = self.state_actions[state].index(action)
                 action_values[index_1] = 0
                 for next_state in self.state_list_scheduler:
+                    if (state, action, next_state) not in self.time_steps.keys():
+                        time_val = 1
+                    else:
+                        time_val = self.time_steps[(state, action, next_state)]
                     action_values[index_1] += (self.transition(state, action, next_state) * (
                             self.get_reward(state, action, next_state) + (
-                            self.discount * self.value[self.state_list_scheduler.index(next_state)])))
+                        (pow(self.discount, time_val)) * self.value[self.state_list_scheduler.index(next_state)])))
             policy_1[state] = self.state_actions[state][action_values.index(max(action_values))]
         return policy_1

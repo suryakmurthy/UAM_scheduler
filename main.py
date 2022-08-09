@@ -49,12 +49,10 @@ if __name__ == "__main__":
             new_task = task(in_c, in_d, in_a, hard=hard_bool)
             task_list.append(new_task)
     else:
-        task_1 = task({3: 0.5, 4: 0.5}, 7, {8: 1.0}, hard=True)
-        task_2 = task({2: 1.0}, 3, {4: 1.0}, hard=False)
-        # task_3 = task({2: 1.0}, 3, {4: 1.0}, hard=False)
-        # task_4 = task({2: 1.0}, 3, {4: 1.0}, hard=False)
+        task_list = [task({3: 0.5, 4: 0.5}, 7, {8: 1.0}, hard=True)]
+        for i in range(1, in_val):
+            task_list.append(task({2: 1.0}, 3, {4: 1.0}, hard=False))
         hard_val = True
-        task_list = [task_1, task_2] #, task_3, task_4]
     type_str = raw_input("Do you want a non-preemptible MDP? (y/n): ")
     if not type_str:
         type_str = "y"
@@ -68,6 +66,7 @@ if __name__ == "__main__":
     else:
         depth = 100
     MDP_obj.generate_MDP(depth)
+
     print("MDP Size: ", len(MDP_obj.state_list_scheduler))
     if type_str == "y":
         sched = scheduler_uam(MDP_obj)
@@ -82,13 +81,14 @@ if __name__ == "__main__":
         prob_c, prob_a = sched.hard_task_learning(0.1, 0.1, num_samples=num_samples)
     else:
         prob_c, prob_a = sched.soft_task_learning(0.1, 0.1, num_samples=num_samples)
-    print( "num_samples: ", num_samples, "prob_arrival: ", prob_a, "prob_comp: ", prob_c)
+    print("num_samples: ", num_samples, "prob_arrival: ", prob_a, "prob_comp: ", prob_c)
     sched.make_estimate_MDP(depth)
     conv_val = raw_input("Enter Convergence Parameter for Value Iteration (Float): ")
+    print('Starting Value Iteration')
     if not conv_val:
         conv_val = 0.01
     total_time = 0
-    for i in range (0, 20):
+    for i in range (0, 1):
         pol_1, time_val = sched.optimal_policy(conv_val)
         total_time += time_val
         print("Val iteration Time value: ", i, time_val)
@@ -102,6 +102,7 @@ if __name__ == "__main__":
                 print job_1.return_data(),
         print(pol_1[state])
     num_ep = raw_input("Enter Number of Episodes for Testing (Int): ")
+    print("Starting Value Iteration Testing")
     if num_ep:
         num_ep = int(num_ep)
     else:

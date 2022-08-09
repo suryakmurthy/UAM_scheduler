@@ -75,7 +75,6 @@ class scheduler:
                 discount parameter at each break-out step.
 
         """
-
         if depth == 0:
             total_reward = cur_reward
             return total_reward
@@ -89,20 +88,33 @@ class scheduler:
                 next_action = None
             else:
                 hard_deadline_dict = {}
+                hard_comp_time_dict = {}
                 soft_deadline_dict = {}
-                for job_index in self.estimate_MDP.state_actions[cur_state]:
-                    if job_index != None:
-                        if next_state_1[job_index].h_s == True and next_state_1[job_index].d_i != 0:
-                            if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
-                                hard_deadline_dict[job_index] = next_state_1[job_index].d_i
-                        if next_state_1[job_index].h_s == False and next_state_1[job_index].d_i != 0:
-                            if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
-                                soft_deadline_dict[job_index] = next_state_1[job_index].d_i
+                soft_comp_time_dict = {}
+                for job_index in range(0, len(cur_state)):
+                    if next_state_1[job_index].h_s == True and next_state_1[job_index].d_i != 0:
+                        if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
+                            hard_deadline_dict[job_index] = next_state_1[job_index].d_i
+                            hard_comp_time_dict[job_index] = max(next_state_1[job_index].c_i.keys())
+                    if next_state_1[job_index].h_s == False and next_state_1[job_index].d_i != 0:
+                        if not (0 in next_state_1[job_index].c_i and next_state_1[job_index].c_i[0] == 1.0):
+                            soft_deadline_dict[job_index] = next_state_1[job_index].d_i
+                            soft_comp_time_dict[job_index] = max(next_state_1[job_index].c_i.keys())
                 next_action = None
-                if hard_deadline_dict != {}:
-                    next_action = min(hard_deadline_dict, key=hard_deadline_dict.get)
-                elif soft_deadline_dict != {}:
-                    next_action = min(soft_deadline_dict, key=soft_deadline_dict.get)
+                if hard_deadline_dict != {} and soft_deadline_dict != {}:
+                    min_hard_key = min(hard_deadline_dict, key=hard_deadline_dict.get)
+                    min_soft_key = min(soft_deadline_dict, key=soft_deadline_dict.get)
+                    if hard_deadline_dict[min_hard_key] - hard_comp_time_dict[min_hard_key] > soft_comp_time_dict[min_soft_key]:
+                        next_action = min_soft_key
+                    else:
+                        next_action = min_hard_key
+                else:
+                    if hard_deadline_dict != {}:
+                        min_hard_key = min(hard_deadline_dict, key=hard_deadline_dict.get)
+                        next_action = min_hard_key
+                    elif soft_deadline_dict != {}:
+                        min_soft_key = min(soft_deadline_dict, key=soft_deadline_dict.get)
+                        next_action = min_soft_key
         total_reward += self.MCTS_simulation_step(next_state_1, next_action, depth - 1, total_reward, rand=rand)
         return discount * total_reward
 
@@ -401,5 +413,5 @@ class scheduler:
                 if self.estimate_MDP.check_if_equal(current_state, start_state) == True:
                     finished_bool = True
             reward_dict[episode] = reward
-        return reward_dict
+        return reward_dict, time_total, time_counter
 
