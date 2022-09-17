@@ -13,7 +13,8 @@ class scheduler:
         self.states = self.MDP.states
         self.e_value = 1
         self.policy = {}
-        self.r = len(self.MDP.prob)
+        potential_r = [max(task.a_i.keys()) for task in self.MDP.task_list]
+        self.r = max(potential_r)
 
 
     def MCTS(self, state, depth, samples, discount = 1.0, rand=True):
